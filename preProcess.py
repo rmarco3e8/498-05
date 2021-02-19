@@ -1,27 +1,19 @@
 # Import all of the necessary packages
-#%load_ext autoreload
-#%autoreload 2
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LinearRegression
-from convokit import Corpus, download
 from sklearn.model_selection import train_test_split
-from numpy import random
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
-from statsmodels.formula.api import ols
-from statsmodels.stats.anova import anova_lm
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-from scipy.stats import norm
 import nltk
-from statsmodels.graphics.gofplots import qqplot
 import pathlib
 import os
 import shutil
 from pycontractions import Contractions
+from helper import *
+import contractions
 
 
 """
@@ -30,8 +22,8 @@ processed .txt file in /processed/
 """
 def preProcessLyrics():
 
-    nltk.download('punkt')
-    nltk.download('stopwords')
+    # nltk.download('punkt')
+    # nltk.download('stopwords')
 
     cont = Contractions(api_key="glove-twitter-100")
 
@@ -50,14 +42,19 @@ def preProcessLyrics():
         filePath = os.path.join(lyricsPath, file)
         output = ''
 
-        # Make lowercase, expand contractions
         with open(filePath) as f:
             lyrics = f.read()
-            lyrics = lyrics.lower()
-            lyrics = cont.expand_texts([lyrics])
 
-            for word in lyrics:
-                output += word + ' '
+            # Make lowercase, lemmatize, expand contractions, remove stop words
+            lyrics = lyrics.lower()
+            stop_words = set(stopwords.words('english'))
+            lyrics = [l for l in lyrics.split() if l not in stop_words]
+            lyrics = lemmatize(lyrics)
+
+            #lyrics = cont.expand_texts([lyrics])
+            lyrics = [contractions.fix(l) for l in lyrics]
+            
+            output = ' '.join(lyrics)
 
         with open(os.path.join(dir, str(count) + '.txt'), 'w') as f:
             f.write(output)
