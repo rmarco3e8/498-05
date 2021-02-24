@@ -1,12 +1,12 @@
 # Import all of the necessary packages
 import pandas as pd
 import numpy as np
+import re
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.corpus import stopwords
-from nltk.sentiment.util import mark_negation
 from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
 import pathlib
@@ -48,6 +48,7 @@ def preProcessLyrics():
 
             # Make lowercase, lemmatize, expand contractions, remove stop words
             lyrics = lyrics.lower()
+            # handle negation
             lyrics = handle_negation(lyrics)
             stop_words = set(stopwords.words('english'))
             lyrics = [l for l in lyrics.split() if l not in stop_words]
@@ -56,7 +57,9 @@ def preProcessLyrics():
             #lyrics = cont.expand_texts([lyrics])
             lyrics = [contractions.fix(l) for l in lyrics]
             
-            output = ' '.join(lyrics)
+            #remove punctuation, while keeping negation terms. remove multiple white spaces  do we want to keep "[chorus]"  tags?
+
+            output = re.sub(r'\s{1,}'," ", re.sub(r'[^\w\s_]','',' '.join(lyrics)))
 
         with open(os.path.join(dir, file[:-4] + "p" + '.txt'), 'w', encoding='utf8') as f:
             f.write(output)

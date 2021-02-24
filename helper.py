@@ -12,7 +12,7 @@ def handle_negation(sentence):
         return " " + matched_obj.group(0)
 
     # add a period upon new line if new line does not already end with punctuation and is not followed by another new line
-    sentence = re.sub(r"(?<![[^\w\s']])\n(?=\w)",".",sentence)
+    sentence = re.sub(r"(?<![[^\w\s']])\n(?!\n)",". ",sentence)
 
     # add space before punctuation (not apostrophe's to avoid contraction issues)
     sentence = re.sub(r"[^\w\s']", add_space , sentence)
@@ -62,6 +62,6 @@ if __name__ == '__main__':
     sentence = ["I'm", 'just', 'tryna', 'flex', 'on', 'these', 'hoes', 'but', 'I', 'can\'t']
     print(lemmatize(sentence))
 
-    sentence = """I'm not outside in an AMG. right outside, TT"""
+    sentence = """An old man said to me, wont see another one"""
     print(handle_negation(sentence))
 
