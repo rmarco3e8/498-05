@@ -17,6 +17,9 @@ def handle_negation(sentence):
     # add space before punctuation (not apostrophe's to avoid contraction issues)
     sentence = re.sub(r"[^\w\s']", add_space , sentence)
 
+    # remove commas to avoid erroneous negation
+    sentence = sentence.replace(",","")
+
     # mark negation and put string back together
     sentence = " ".join(mark_negation(sentence.split()))
 
@@ -62,6 +65,8 @@ if __name__ == '__main__':
     sentence = ["I'm", 'just', 'tryna', 'flex', 'on', 'these', 'hoes', 'but', 'I', 'can\'t']
     print(lemmatize(sentence))
 
-    sentence = """An old man said to me, wont see another one"""
+    sentence = """You'll know we are equally damaged
+Don't be a fool, make it easier
+You'll learn to say when"""
     print(handle_negation(sentence))
 
