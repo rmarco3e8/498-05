@@ -1,5 +1,26 @@
 import nltk
+import re
 from nltk.corpus import wordnet
+from nltk.sentiment.util import mark_negation
+
+def handle_negation(sentence):
+    """
+    Adds negative tag to every word between appearance of negation term and the next punctuation mark or next line
+
+    """
+    def add_space(matched_obj):
+        return " " + matched_obj.group(0)
+
+    # add a period upon new line if new line does not already end with punctuation and is not followed by another new line
+    sentence = re.sub(r"(?<![[^\w\s']])\n(?=\w)",".",sentence)
+
+    # add space before punctuation (not apostrophe's to avoid contraction issues)
+    sentence = re.sub(r"[^\w\s']", add_space , sentence)
+
+    # mark negation and put string back together
+    sentence = " ".join(mark_negation(sentence.split()))
+
+    return sentence 
 
 def lemmatize(word_list):
 
@@ -38,5 +59,9 @@ if __name__ == '__main__':
     sentence = ['I', 'play']
     print(lemmatize(sentence))
 
-    sentence = ['I\'m', 'just', 'tryna', 'flex', 'on', 'these', 'hoes', 'but', 'I', 'can\'t']
+    sentence = ["I'm", 'just', 'tryna', 'flex', 'on', 'these', 'hoes', 'but', 'I', 'can\'t']
     print(lemmatize(sentence))
+
+    sentence = """I'm not outside in an AMG. right outside, TT"""
+    print(handle_negation(sentence))
+
