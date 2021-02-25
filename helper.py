@@ -12,7 +12,7 @@ def handle_negation(sentence):
         return " " + matched_obj.group(0)
 
     # add a period upon new line if new line does not already end with punctuation and is not followed by another new line
-    sentence = re.sub(r"(?<![[^\w\s']])\n(?!\n)",". ",sentence)
+    #sentence = re.sub(r"(?<![[^\w\s']])\n(?!\n)",". ",sentence)
 
     # add space before punctuation (not apostrophe's to avoid contraction issues)
     sentence = re.sub(r"[^\w\s']", add_space , sentence)
