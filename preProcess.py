@@ -47,19 +47,30 @@ def preProcessLyrics():
             lyrics = f.read()
 
             # Make lowercase, lemmatize, expand contractions, remove stop words
+            
+            # adds periods @ new line 
+            lyrics  = re.sub(r"(?<![[^\w\s']])\n(?!\n)",". ",lyrics)
             lyrics = lyrics.lower()
-            # handle negation
-            lyrics = handle_negation(lyrics)
+
             stop_words = set(stopwords.words('english'))
+
             lyrics = [l for l in lyrics.split() if l not in stop_words]
+            #print(lyrics)
+
             lyrics = lemmatize(lyrics)
+            #print(lyrics)
 
             #lyrics = cont.expand_texts([lyrics])
             lyrics = [contractions.fix(l) for l in lyrics]
+            #print(lyrics)
             
-            #remove punctuation, while keeping negation terms. remove multiple white spaces  do we want to keep "[chorus]"  tags?
+             # handle negation
+            lyrics = handle_negation(" ".join(lyrics))
+            #print(lyrics)
 
-            output = re.sub(r'\s{1,}'," ", re.sub(r'[^\w\s_]','',' '.join(lyrics)))
+            # remove punctuation, while keeping negation terms. remove multiple white spaces  do we want to keep "[chorus]"  tags?
+            output = re.sub(r'\s{1,}'," ", re.sub(r'[^\w\s_]','',lyrics))
+            #print(output)
 
         with open(os.path.join(dir, file[:-4] + "p" + '.txt'), 'w', encoding='utf8') as f:
             f.write(output)
