@@ -19,6 +19,7 @@ import shutil
 #from pycontractions import Contractions
 from helper import *
 import contractions
+from nrclex import NRCLex
 
 
 """
@@ -81,7 +82,8 @@ def preProcessLyrics():
 
         count += 1
 
-def tfidf_features(random=None):
+
+def file_to_df():
     path = 'processed/'
     lyrics = []
     labels = []
@@ -103,6 +105,12 @@ def tfidf_features(random=None):
     labels = np.array(labels).reshape(-1, 1)
     df = pd.DataFrame(np.hstack((lyrics, labels)), columns=['lyrics', 'labels'])
 
+    return df
+
+
+def tfidf_features(random=None):
+    df = file_to_df()
+
     # 80-20 Train-test split
     if random is None:
         train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, stratify=df.labels)
@@ -118,58 +126,45 @@ def tfidf_features(random=None):
 
     return X_train, train_df.labels, X_test, test_df.labels
 
-def svm_train(gamma_vals, k=5):
-    X_train, y_train, X_test, y_test = tfidf_features(random=250)
-    best_score, best_gamma = -1, -1
 
-    for gamma in gamma_vals:
-        clf = SVC(gamma=gamma)
-        score = np.mean(cross_val_score(clf, X_train, y_train, cv=5))
-        print('gamma: ' + str(gamma) + '\tscore: ' + str(score))
-        if score > best_score:
-            best_score = score
-            best_gamma = gamma
+def to_nrclex(data):
+    out_data = np.zeros((len(data), 10))
+    for idx in range(len(data)):
+        lyrics = data.iloc[idx]
+        d = NRCLex(lyrics).raw_emotion_scores
+        tokens = len(nltk.word_tokenize(lyrics))
 
-    print('\nBest gamma: ' + str(best_gamma) + '\n')
+        emo = ['anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust', 'postive', 'negative']
+        for emo_idx in range(len(emo)):
+            if emo[emo_idx] not in d.keys():
+                out_data[idx, emo_idx] = 0
+            else:
+                out_data[idx, emo_idx] = (d[emo[emo_idx]] / tokens)
 
-    clf = SVC(gamma=best_gamma)
-    clf.fit(X_train, y_train)
-    return clf, X_train, y_train, X_test, y_test
+    return out_data
 
-def get_metrics(y_pred, y):
-    print('Accuracy:', str(metrics.accuracy_score(y, y_pred)))
-    print('Confusion Matrix', str(metrics.confusion_matrix(y, y_pred)))
 
-def svm_main(search='random', search_vals=25, k=5):
-    if search == 'random':
-        # Log Uniform
-        exp = np.random.uniform(-3, 3, search_vals)
-        gamma_vals = 10 ** exp
-    elif search == 'grid':
-        gamma_vals = np.logspace(-3, 3, search_vals)
+def nrclex_features(random=None):
+    df = file_to_df()
+
+    # 80-20 Train-test split
+    if random is None:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, stratify=df.labels)
     else:
-        assert False, 'Search must be random or grid'
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, random_state=random, stratify=df.labels)
 
-    clf, X_train, y_train, X_test, y_test = svm_train(gamma_vals, k)
-    y_pred = clf.predict(X_test)
-    y_train_pred = clf.predict(X_train)
+    X_train = to_nrclex(train_df.lyrics)
+    X_test = to_nrclex(test_df.lyrics)
 
-    print('Performance on training dataset:')
-    get_metrics(y_train_pred, y_train)
-    print('\n\nPerformance on test data:')
-    get_metrics(y_pred, y_test)
-
-
-        
+    return X_train, train_df.labels, X_test, test_df.labels
 
 
 def preProcessAudio():
     pass
 
 def main():
-    # preProcessLyrics()
+    preProcessLyrics()
     # preProcessAudio()
-    svm_main(search_vals=10)
 
 if __name__ == "__main__":
     main()

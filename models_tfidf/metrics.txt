@@ -1,0 +1,39 @@
+Performance on training dataset:
+Accuracy: 0.9819967266775778
+Confusion Matrix [[106   0   1   0   1]
+ [  1 108   0   1   0]
+ [  0   2 151   0   1]
+ [  0   2   1 135   0]
+ [  1   0   0   0 100]]
+Classification Report               precision    recall  f1-score   support
+
+           1       0.98      0.98      0.98       108
+           2       0.96      0.98      0.97       110
+           3       0.99      0.98      0.98       154
+           4       0.99      0.98      0.99       138
+           5       0.98      0.99      0.99       101
+
+    accuracy                           0.98       611
+   macro avg       0.98      0.98      0.98       611
+weighted avg       0.98      0.98      0.98       611
+
+
+
+Performance on test data:
+Accuracy: 0.41830065359477125
+Confusion Matrix [[ 3  3  8 10  3]
+ [ 4 11  9  3  1]
+ [ 1  0 29  7  1]
+ [ 2  2 11 16  4]
+ [ 3  2  7  8  5]]
+Classification Report               precision    recall  f1-score   support
+
+           1       0.23      0.11      0.15        27
+           2       0.61      0.39      0.48        28
+           3       0.45      0.76      0.57        38
+           4       0.36      0.46      0.41        35
+           5       0.36      0.20      0.26        25
+
+    accuracy                           0.42       153
+   macro avg       0.40      0.38      0.37       153
+weighted avg       0.41      0.42      0.39       153
