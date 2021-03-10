@@ -23,8 +23,10 @@ processed .txt file in /processed/
 """
 def preProcessLyrics():
 
-    # nltk.download('punkt')
-    # nltk.download('stopwords')
+    #nltk.download('punkt')
+    #nltk.download('stopwords')
+    #nltk.download('averaged_perceptron_tagger')
+    #nltk.download('wordnet')
 
     #cont = Contractions(api_key="glove-twitter-100")
 
