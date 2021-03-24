@@ -1,0 +1,6 @@
+Series {
+  -> input: SoundFileSource
+  -> ZeroCrossings
+  -> CsvSink { filename="result_zerocrossings2.csv" }
+  + done = (input/hasData == false)
+}

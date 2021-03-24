@@ -20,6 +20,8 @@ import shutil
 from helper import *
 import contractions
 from nrclex import NRCLex
+from midi2audio import FluidSynth
+import csv
 
 
 """
@@ -107,6 +109,48 @@ def file_to_df():
 
     return df
 
+def marsyas_df_zerocrossings():
+    path = 'MIDIsCSV/'
+    processed_path = 'audio_processed/'
+    marsyas_path = 'marsyas-0.5.0/bin/'
+
+    zeroCrossings = []
+    labels = []
+    all_labels = []
+
+    # Read all labels
+    with open('MIREX-like_mood/dataset/clusters.txt', 'r') as f:
+        for line in f:
+            all_labels.append(int(line[8:9]))
+
+    # Read lyrics and labels for the songs with lyrics
+    for fname in os.listdir(path):
+
+        with open(path + fname, newline='') as f:
+
+            reader = csv.reader(f, delimiter=' ')
+            #ncol = len(next(reader))
+            #f.seek(0)
+
+            #totals = np.zeros(ncol)
+            total = 0.0
+
+            # Sum zero crossings for the first audio channel
+            for row in reader:
+                total += float(row[0])
+                #for col in range(ncol):
+                    #totals[col] += row[col]
+
+            zeroCrossings.append(int(total))
+            num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
+            labels.append(all_labels[num])
+
+    zeroCrossings = np.array(zeroCrossings).reshape(-1, 1)
+    labels = np.array(labels).reshape(-1, 1)
+    df = pd.DataFrame(np.hstack((zeroCrossings, labels)), columns=['zeroCrossings', 'labels'])
+
+    return df
+
 
 def tfidf_features(random=None):
     df = file_to_df()
@@ -143,7 +187,6 @@ def to_nrclex(data):
 
     return out_data
 
-
 def nrclex_features(random=None):
     df = file_to_df()
 
@@ -158,13 +201,59 @@ def nrclex_features(random=None):
 
     return X_train, train_df.labels, X_test, test_df.labels
 
+def marsyas_features(random=None):
+    df = marsyas_df_zerocrossings()
+
+    if random is None:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, stratify=df.labels)
+    else:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, random_state=random, stratify=df.labels)
+
+    X_train = np.array(train_df.zeroCrossings).reshape(-1, 1)
+    X_test = np.array(test_df.zeroCrossings).reshape(-1,1)
+
+    return X_train, train_df.labels, X_test, test_df.labels
+
 
 def preProcessAudio():
-    pass
+
+    dir = os.path.join(os.getcwd(), 'audio_processed')
+    MIDIsPath = os.path.join(os.getcwd(), 'MIREX-like_mood', 'dataset', 'MIDIs')
+    MIDIsWavPath = os.path.join(os.getcwd(), 'MIDIsWav')
+    MIDIsCSVPath = os.path.join(os.getcwd(), 'MIDIsCSV')
+    marsyas_path = 'marsyas-0.5.0/bin/'
+
+    if os.path.exists(dir):
+        shutil.rmtree(dir)
+
+    # Create /audio_processed/
+    os.makedirs(dir)
+
+    if os.path.exists(MIDIsWavPath):
+        shutil.rmtree(MIDIsWavPath)
+
+    # Create /MIDIsWav/
+    os.makedirs(MIDIsWavPath)
+
+    if os.path.exists(MIDIsCSVPath):
+        shutil.rmtree(MIDIsCSVPath)
+
+    # Create /MIDIsCSV/
+    os.makedirs(MIDIsCSVPath)
+
+    fs = FluidSynth(sound_font="GeneralUser_GS_1.471/GeneralUser_GS_v1.471.sf2")
+
+    for file in os.listdir(MIDIsPath):
+        fs.midi_to_audio(os.path.join(MIDIsPath, file), os.path.join(MIDIsWavPath, file[:-4] + "p" + '.wav'))
+
+    for file in os.listdir(MIDIsWavPath):
+        os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'zero_crossings.mrs -c input/filename="MIDIsWav/' + file + '"')
+        os.rename('result_zerocrossings.csv', 'MIDIsCSV/' + file[:-4] + '.csv')
+
 
 def main():
     preProcessLyrics()
-    # preProcessAudio()
+    preProcessAudio()
 
 if __name__ == "__main__":
     main()

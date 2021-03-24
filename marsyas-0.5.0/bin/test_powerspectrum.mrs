@@ -1,0 +1,6 @@
+Series {
+  -> input: SoundFileSource{ filename="1mb.wav"}
+  -> Spectrum -> PowerSpectrum
+  -> CsvSink { filename="result_powerspectrum.csv" }
+  + done = (input/hasData == false)
+}
