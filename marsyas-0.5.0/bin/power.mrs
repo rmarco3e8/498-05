@@ -1,0 +1,6 @@
+Series {
+  -> input: SoundFileSource
+  -> Power
+  -> CsvSink { filename="result_power.csv" }
+  + done = (input/hasData == false)
+}

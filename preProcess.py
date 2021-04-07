@@ -22,6 +22,7 @@ import contractions
 from nrclex import NRCLex
 from midi2audio import FluidSynth
 import csv
+from pydub import AudioSegment
 
 
 """
@@ -110,8 +111,9 @@ def file_to_df():
     return df
 
 def marsyas_df_zerocrossings():
-    path = 'MIDIsCSV/'
-    processed_path = 'audio_processed/'
+    #path = 'MIDIsCSVzero/'
+    path = 'AudioCSVzero/'
+    #processed_path = 'audio_processed/'
     marsyas_path = 'marsyas-0.5.0/bin/'
 
     zeroCrossings = []
@@ -132,16 +134,23 @@ def marsyas_df_zerocrossings():
             #ncol = len(next(reader))
             #f.seek(0)
 
+            total = 0
             #totals = np.zeros(ncol)
-            total = 0.0
+            #total = ""
+            count_samples = 0
 
             # Sum zero crossings for the first audio channel
             for row in reader:
+                #total += str(row[0]) + " "
+                count_samples += 1
                 total += float(row[0])
                 #for col in range(ncol):
                     #totals[col] += row[col]
 
+            #print(total)
+            #print(count_samples)
             zeroCrossings.append(int(total))
+            #zeroCrossings.append(total)
             num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
             labels.append(all_labels[num])
 
@@ -151,6 +160,148 @@ def marsyas_df_zerocrossings():
 
     return df
 
+def marsyas_df_yinpitch():
+    #path = 'MIDIsCSVyin/'
+    path = 'AudioCSVyin/'
+    processed_path = 'audio_processed/'
+    marsyas_path = 'marsyas-0.5.0/bin/'
+
+    yinPitch = []
+    labels = []
+    all_labels = []
+
+    # Read all labels
+    with open('MIREX-like_mood/dataset/clusters.txt', 'r') as f:
+        for line in f:
+            all_labels.append(int(line[8:9]))
+
+    # Read lyrics and labels for the songs with lyrics
+    for fname in os.listdir(path):
+
+        with open(path + fname, newline='') as f:
+
+            reader = csv.reader(f, delimiter=' ')
+            #ncol = len(next(reader))
+            #f.seek(0)
+
+            #totals = np.zeros(ncol)
+            total = 0
+
+            # Sum zero crossings for the first audio channel
+            for row in reader:
+                total += float(row[0])
+                #for col in range(ncol):
+                    #totals[col] += row[col]
+
+            yinPitch.append(int(total))
+            num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
+            labels.append(all_labels[num])
+
+    yinPitch = np.array(yinPitch).reshape(-1, 1)
+    labels = np.array(labels).reshape(-1, 1)
+    df = pd.DataFrame(np.hstack((yinPitch, labels)), columns=['yinPitch', 'labels'])
+
+    return df
+
+def marsyas_df_energy():
+    #path = 'MIDIsCSVzero/'
+    path = 'AudioCSVenergy/'
+    #processed_path = 'audio_processed/'
+    marsyas_path = 'marsyas-0.5.0/bin/'
+
+    energy = []
+    labels = []
+    all_labels = []
+
+    # Read all labels
+    with open('MIREX-like_mood/dataset/clusters.txt', 'r') as f:
+        for line in f:
+            all_labels.append(int(line[8:9]))
+
+    # Read lyrics and labels for the songs with lyrics
+    for fname in os.listdir(path):
+
+        with open(path + fname, newline='') as f:
+
+            reader = csv.reader(f, delimiter=' ')
+            #ncol = len(next(reader))
+            #f.seek(0)
+
+            total = 0
+            #totals = np.zeros(ncol)
+            #total = ""
+            count_samples = 0
+
+            # Sum zero crossings for the first audio channel
+            for row in reader:
+                #total += str(row[0]) + " "
+                count_samples += 1
+                total += float(row[0])
+                #for col in range(ncol):
+                    #totals[col] += row[col]
+
+            #print(total)
+            #print(count_samples)
+            energy.append(int(total))
+            #zeroCrossings.append(total)
+            num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
+            labels.append(all_labels[num])
+
+    energy = np.array(energy).reshape(-1, 1)
+    labels = np.array(labels).reshape(-1, 1)
+    df = pd.DataFrame(np.hstack((energy, labels)), columns=['energy', 'labels'])
+
+    return df
+
+def marsyas_df_power():
+    #path = 'MIDIsCSVzero/'
+    path = 'AudioCSVpower/'
+    #processed_path = 'audio_processed/'
+    marsyas_path = 'marsyas-0.5.0/bin/'
+
+    power = []
+    labels = []
+    all_labels = []
+
+    # Read all labels
+    with open('MIREX-like_mood/dataset/clusters.txt', 'r') as f:
+        for line in f:
+            all_labels.append(int(line[8:9]))
+
+    # Read lyrics and labels for the songs with lyrics
+    for fname in os.listdir(path):
+
+        with open(path + fname, newline='') as f:
+
+            reader = csv.reader(f, delimiter=' ')
+            #ncol = len(next(reader))
+            #f.seek(0)
+
+            total = 0
+            #totals = np.zeros(ncol)
+            #total = ""
+            count_samples = 0
+
+            # Sum zero crossings for the first audio channel
+            for row in reader:
+                #total += str(row[0]) + " "
+                count_samples += 1
+                total += float(row[0])
+                #for col in range(ncol):
+                    #totals[col] += row[col]
+
+            #print(total)
+            #print(count_samples)
+            power.append(int(total))
+            #zeroCrossings.append(total)
+            num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
+            labels.append(all_labels[num])
+
+    power = np.array(power).reshape(-1, 1)
+    labels = np.array(labels).reshape(-1, 1)
+    df = pd.DataFrame(np.hstack((power, labels)), columns=['power', 'labels'])
+
+    return df
 
 def tfidf_features(random=None):
     df = file_to_df()
@@ -201,7 +352,23 @@ def nrclex_features(random=None):
 
     return X_train, train_df.labels, X_test, test_df.labels
 
-def marsyas_features(random=None):
+def to_zerocrossing(data):
+    #arr = data.split(str=" ")
+    #print(arr)
+    test = data.iloc[0].split()
+    out_data = np.zeros((len(data), len(test)))
+    for idx in range(len(data)):
+        zeroCrossings = data.iloc[idx]
+        arr = zeroCrossings.split()
+        print(len(arr))
+        for i in range(len(arr)):
+            out_data[idx][i] = float(arr[i])
+
+    print(out_data)
+
+    return out_data
+
+def marsyas_features_zero(random=None):
     df = marsyas_df_zerocrossings()
 
     if random is None:
@@ -212,15 +379,77 @@ def marsyas_features(random=None):
     X_train = np.array(train_df.zeroCrossings).reshape(-1, 1)
     X_test = np.array(test_df.zeroCrossings).reshape(-1,1)
 
+    #X_train = to_zerocrossing(train_df.zeroCrossings)
+    #X_test = to_zerocrossing(test_df.zeroCrossings)
+
     return X_train, train_df.labels, X_test, test_df.labels
 
+def marsyas_features_yin(random=None):
+    df = marsyas_df_yinpitch()
+
+    if random is None:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, stratify=df.labels)
+    else:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, random_state=random, stratify=df.labels)
+
+    X_train = np.array(train_df.yinPitch).reshape(-1, 1)
+    X_test = np.array(test_df.yinPitch).reshape(-1,1)
+
+    return X_train, train_df.labels, X_test, test_df.labels
+
+def marsyas_features_energy(random=None):
+    df = marsyas_df_energy()
+
+    if random is None:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, stratify=df.labels)
+    else:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, random_state=random, stratify=df.labels)
+
+    X_train = np.array(train_df.energy).reshape(-1, 1)
+    X_test = np.array(test_df.energy).reshape(-1,1)
+
+    #X_train = to_zerocrossing(train_df.zeroCrossings)
+    #X_test = to_zerocrossing(test_df.zeroCrossings)
+
+    return X_train, train_df.labels, X_test, test_df.labels
+
+def marsyas_features_power(random=None):
+    df = marsyas_df_power()
+
+    if random is None:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, stratify=df.labels)
+    else:
+        train_df, test_df = train_test_split(df, train_size=0.8, test_size=0.2, random_state=random, stratify=df.labels)
+
+    X_train = np.array(train_df.power).reshape(-1, 1)
+    X_test = np.array(test_df.power).reshape(-1,1)
+
+    #X_train = to_zerocrossing(train_df.zeroCrossings)
+    #X_test = to_zerocrossing(test_df.zeroCrossings)
+
+    return X_train, train_df.labels, X_test, test_df.labels
 
 def preProcessAudio():
 
     dir = os.path.join(os.getcwd(), 'audio_processed')
+
+    """
+    
     MIDIsPath = os.path.join(os.getcwd(), 'MIREX-like_mood', 'dataset', 'MIDIs')
     MIDIsWavPath = os.path.join(os.getcwd(), 'MIDIsWav')
-    MIDIsCSVPath = os.path.join(os.getcwd(), 'MIDIsCSV')
+    MIDIsCSVPathZero = os.path.join(os.getcwd(), 'MIDIsCSVzero')
+    MIDIsCSVPathYin = os.path.join(os.getcwd(), 'MIDIsCSVyin')
+
+    """
+    AudioPath = os.path.join(os.getcwd(), 'Mirex-like_mood', 'dataset', 'Audio')
+    AudioWavPath = os.path.join(os.getcwd(), 'AudioWav')
+    AudioCSVPathZero = os.path.join(os.getcwd(), 'AudioCSVzero')
+    AudioCSVPathYin = os.path.join(os.getcwd(), 'AudioCSVyin')
+    AudioCSVPathSkewness = os.path.join(os.getcwd(), 'AudioCSVskewness')
+    AudioCSVPathSFM = os.path.join(os.getcwd(), 'AudioCSVsfm')
+    AudioCSVPathEnergy = os.path.join(os.getcwd(), 'AudioCSVenergy')
+    AudioCSVPathPower = os.path.join(os.getcwd(), 'AudioCSVpower')
+
     marsyas_path = 'marsyas-0.5.0/bin/'
 
     if os.path.exists(dir):
@@ -229,17 +458,80 @@ def preProcessAudio():
     # Create /audio_processed/
     os.makedirs(dir)
 
+    ##################################
+    """
+
     if os.path.exists(MIDIsWavPath):
         shutil.rmtree(MIDIsWavPath)
 
     # Create /MIDIsWav/
     os.makedirs(MIDIsWavPath)
 
-    if os.path.exists(MIDIsCSVPath):
-        shutil.rmtree(MIDIsCSVPath)
+    if os.path.exists(MIDIsCSVPathZero):
+        shutil.rmtree(MIDIsCSVPathZero)
 
-    # Create /MIDIsCSV/
-    os.makedirs(MIDIsCSVPath)
+    # Create /MIDIsCSVzero/
+    os.makedirs(MIDIsCSVPathZero)
+
+    if os.path.exists(MIDIsCSVPathYin):
+        shutil.rmtree(MIDIsCSVPathYin)
+
+    # Create /MIDIsCSVyin/
+    os.makedirs(MIDIsCSVPathYin)
+
+    ##################################
+    """
+    """
+
+    if os.path.exists(AudioWavPath):
+        shutil.rmtree(AudioWavPath)
+
+    # Create /AudioWav/
+    os.makedirs(AudioWavPath)
+
+    if os.path.exists(AudioCSVPathZero):
+        shutil.rmtree(AudioCSVPathZero)
+
+    # Create /AudioCSVzero/
+    os.makedirs(AudioCSVPathZero)
+
+    if os.path.exists(AudioCSVPathYin):
+        shutil.rmtree(AudioCSVPathYin)
+
+    # Create /AudioCSVyin/
+    os.makedirs(AudioCSVPathYin)
+
+    if os.path.exists(AudioCSVPathSkewness):
+        shutil.rmtree(AudioCSVPathSkewness)
+
+    # Create /AudioCSVskewness/
+    os.makedirs(AudioCSVPathSkewness)
+
+    if os.path.exists(AudioCSVPathSFM):
+        shutil.rmtree(AudioCSVPathSFM)
+
+    # Create /AudioCSVsfm/
+    os.makedirs(AudioCSVPathSFM)
+
+
+
+    if os.path.exists(AudioCSVPathEnergy):
+        shutil.rmtree(AudioCSVPathEnergy)
+
+    # Create /AudioCSVenergy/
+    os.makedirs(AudioCSVPathEnergy)
+
+    """
+
+    if os.path.exists(AudioCSVPathPower):
+        shutil.rmtree(AudioCSVPathPower)
+
+    # Create /AudioCSVpower/
+    os.makedirs(AudioCSVPathPower)
+
+    """
+    ##################################################
+
 
     fs = FluidSynth(sound_font="GeneralUser_GS_1.471/GeneralUser_GS_v1.471.sf2")
 
@@ -248,11 +540,41 @@ def preProcessAudio():
 
     for file in os.listdir(MIDIsWavPath):
         os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'zero_crossings.mrs -c input/filename="MIDIsWav/' + file + '"')
-        os.rename('result_zerocrossings.csv', 'MIDIsCSV/' + file[:-4] + '.csv')
+        os.rename('result_zerocrossings.csv', 'MIDIsCSVzero/' + file[:-4] + '.csv')
+
+        os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'yin_pitch.mrs -c input/filename="MIDIsWav/' + file + '"')
+        os.rename('result_yinpitch.csv', 'MIDIsCSVyin/' + file[:-4] + '.csv')
+
+
+    ##################################################
+    """
+
+    #for file in os.listdir(AudioPath):
+        #sound = AudioSegment.from_mp3(os.path.join(AudioPath, file))
+        #sound.export(os.path.join(AudioWavPath, file[:-4] + "p" + '.wav'), format="wav")
+
+    for file in os.listdir(AudioWavPath):
+        #os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'zero_crossings.mrs -c input/filename="AudioWav/' + file + '"')
+        #os.rename('result_zerocrossings.csv', 'AudioCSVzero/' + file[:-4] + '.csv')
+
+        #os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'yin_pitch.mrs -c input/filename="AudioWav/' + file + '"')
+        #os.rename('result_yinpitch.csv', 'AudioCSVyin/' + file[:-4] + '.csv')
+
+        #os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'skewness.mrs -c input/filename="AudioWav/' + file + '"')
+        #os.rename('result_skewness.csv', 'AudioCSVskewness/' + file[:-4] + '.csv')
+
+        #os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'sfm.mrs -c input/filename="AudioWav/' + file + '"')
+        #os.rename('result_sfm.csv', 'AudioCSVsfm/' + file[:-4] + '.csv')
+
+        #os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'energy.mrs -c input/filename="AudioWav/' + file + '"')
+        #os.rename('result_energy.csv', 'AudioCSVenergy/' + file[:-4] + '.csv')
+
+        os.system('./' + marsyas_path + 'marsyas-run.exe ' + marsyas_path + 'power.mrs -c input/filename="AudioWav/' + file + '"')
+        os.rename('result_power.csv', 'AudioCSVpower/' + file[:-4] + '.csv')
 
 
 def main():
-    preProcessLyrics()
+    #preProcessLyrics()
     preProcessAudio()
 
 if __name__ == "__main__":

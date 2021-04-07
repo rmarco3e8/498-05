@@ -1,0 +1,6 @@
+Series {
+  -> input: SoundFileSource
+  -> AbsMax
+  -> CsvSink { filename="result_yinpitch.csv" }
+  + done = (input/hasData == false)
+}

@@ -1,0 +1,6 @@
+Series {
+  -> input: SoundFileSource
+  -> SFM
+  -> CsvSink { filename="result_sfm.csv" }
+  + done = (input/hasData == false)
+}

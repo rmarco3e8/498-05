@@ -1,0 +1,6 @@
+Series {
+  -> input: SoundFileSource
+  -> Skewness
+  -> CsvSink { filename="result_skewness.csv" }
+  + done = (input/hasData == false)
+}
