@@ -89,9 +89,19 @@ def svm_train(gamma_vals, k=5, feature_type='tfidf'):
         y_train = y_train_zero
         y_test = y_test_zero
     elif feature_type == 'lyrics_and_zero':
-        X_train_tfidf, y_train_tfidf, X_test_tfidf, y_test_tfidf = tfidf_features(random=250)
-        X_train_nrc, y_train_nrc, X_test_nrc, y_test_nrc = nrclex_features(random=250)
+        X_train_tfidf, y_train_tfidf, X_test_tfidf, y_test_tfidf = tfidf_features(random=250, audio=True)
+        X_train_nrc, y_train_nrc, X_test_nrc, y_test_nrc = nrclex_features(random=250, audio=True)
         X_train_zero, y_train_zero, X_test_zero, y_test_zero = marsyas_features_zero(random=250)
+        #rows, cols = np.shape(X_train_zero)
+        #print("X_train_zero")
+        #print(X_train_zero)
+        #print("X_train_tfidf")
+        #print(X_train_tfidf)
+        #print("y_train_zero")
+        #print(y_train_zero)
+        #print("y_train_tfidf")
+        #print(y_train_tfidf)
+
         X_train = np.hstack((X_train_tfidf, X_train_nrc, X_train_zero))
         X_test = np.hstack((X_test_tfidf, X_test_nrc, X_test_zero))
         y_train = y_train_tfidf
@@ -153,11 +163,11 @@ def svm_main(search='random', search_vals=25, k=5, feature_type='tfidf'):
 if __name__ == "__main__":
     #svm_main(search_vals=20, feature_type='tfidf')
     #svm_main(search_vals=100, feature_type='nrclex')
-    svm_main(search_vals=20, feature_type='both')
+    #svm_main(search_vals=20, feature_type='both')
     #svm_main(search_vals=20, feature_type='marsyas_zero')
     #svm_main(search_vals=20, feature_type='marsyas_yin')
     #svm_main(search_vals=20, feature_type='marsyas_energy')
     #svm_main(search_vals=20, feature_type='marsyas_power')
     #svm_main(search_vals=20, feature_type='zero_and_energy')
     #svm_main(search_vals=20, feature_type = 'marsyas_both')
-    #svm_main(search_vals=20, feature_type='lyrics_and_zero')
+    svm_main(search_vals=20, feature_type='lyrics_and_zero')

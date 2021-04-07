@@ -37,7 +37,9 @@ def preProcessLyrics():
     #cont = Contractions(api_key="glove-twitter-100")
 
     dir = os.path.join(os.getcwd(), 'processed')
+    audio_dir = os.path.join(os.getcwd(), 'audio_processed')
     lyricsPath = os.path.join(os.getcwd(), 'MIREX-like_mood', 'dataset', 'Lyrics')
+    audioPath = os.path.join(os.getcwd(), 'MIREX-like_mood', 'dataset', 'Audio')
 
     if os.path.exists(dir):
         shutil.rmtree(dir)
@@ -46,9 +48,13 @@ def preProcessLyrics():
     os.makedirs(dir)
 
     count = 0
+    
+    lyrics_count = 0
+    audio_count = 0
 
     for file in os.listdir(lyricsPath):
         filePath = os.path.join(lyricsPath, file)
+        audioFilePath = os.path.join(audioPath, file[:-4] + ".mp3")
         output = ''
 
         with open(filePath,encoding='utf8') as f:
@@ -82,12 +88,26 @@ def preProcessLyrics():
 
         with open(os.path.join(dir, file[:-4] + "p" + '.txt'), 'w', encoding='utf8') as f:
             f.write(output)
+            lyrics_count += 1
+
+        #print(audioFilePath)
+        if os.path.exists(audioFilePath):
+            #print("HERE")
+            with open(os.path.join(audio_dir, file[:-4] + "p" + '.txt'), 'w', encoding='utf8') as f:
+                f.write(output)
+                audio_count += 1
 
         count += 1
 
+    print(lyrics_count)
+    print(len(os.listdir(lyricsPath)))
+    print(audio_count)
+    print(len(os.listdir(audioPath)))
 
-def file_to_df():
+def file_to_df(audio=False):
     path = 'processed/'
+    if audio:
+        path = 'audio_processed/'
     lyrics = []
     labels = []
     all_labels = []
@@ -113,6 +133,7 @@ def file_to_df():
 def marsyas_df_zerocrossings():
     #path = 'MIDIsCSVzero/'
     path = 'AudioCSVzero/'
+    lyrics_path = 'processed/'
     #processed_path = 'audio_processed/'
     marsyas_path = 'marsyas-0.5.0/bin/'
 
@@ -128,31 +149,34 @@ def marsyas_df_zerocrossings():
     # Read lyrics and labels for the songs with lyrics
     for fname in os.listdir(path):
 
-        with open(path + fname, newline='') as f:
+        lyrics_filename = os.path.join(lyrics_path, fname[:-4] + '.txt')
+        if os.path.exists(lyrics_filename):
 
-            reader = csv.reader(f, delimiter=' ')
-            #ncol = len(next(reader))
-            #f.seek(0)
+            with open(path + fname, newline='') as f:
 
-            total = 0
-            #totals = np.zeros(ncol)
-            #total = ""
-            count_samples = 0
+                reader = csv.reader(f, delimiter=' ')
+                #ncol = len(next(reader))
+                #f.seek(0)
 
-            # Sum zero crossings for the first audio channel
-            for row in reader:
-                #total += str(row[0]) + " "
-                count_samples += 1
-                total += float(row[0])
-                #for col in range(ncol):
-                    #totals[col] += row[col]
+                total = 0
+                #totals = np.zeros(ncol)
+                #total = ""
+                count_samples = 0
 
-            #print(total)
-            #print(count_samples)
-            zeroCrossings.append(int(total))
-            #zeroCrossings.append(total)
-            num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
-            labels.append(all_labels[num])
+                # Sum zero crossings for the first audio channel
+                for row in reader:
+                    #total += str(row[0]) + " "
+                    count_samples += 1
+                    total += float(row[0])
+                    #for col in range(ncol):
+                        #totals[col] += row[col]
+
+                #print(total)
+                #print(count_samples)
+                zeroCrossings.append(int(total))
+                #zeroCrossings.append(total)
+                num = int(fname[:3]) - 1 # Subtract 1 to get 0 indexed
+                labels.append(all_labels[num])
 
     zeroCrossings = np.array(zeroCrossings).reshape(-1, 1)
     labels = np.array(labels).reshape(-1, 1)
@@ -303,8 +327,8 @@ def marsyas_df_power():
 
     return df
 
-def tfidf_features(random=None):
-    df = file_to_df()
+def tfidf_features(random=None, audio=False):
+    df = file_to_df(audio)
 
     # 80-20 Train-test split
     if random is None:
@@ -338,8 +362,8 @@ def to_nrclex(data):
 
     return out_data
 
-def nrclex_features(random=None):
-    df = file_to_df()
+def nrclex_features(random=None, audio=False):
+    df = file_to_df(audio)
 
     # 80-20 Train-test split
     if random is None:
@@ -574,8 +598,8 @@ def preProcessAudio():
 
 
 def main():
-    #preProcessLyrics()
-    preProcessAudio()
+    preProcessLyrics()
+    #preProcessAudio()
 
 if __name__ == "__main__":
     main()
